@@ -632,7 +632,7 @@ function renderRecordCard(r) {
         <div class="record-info">
           <div class="record-info-top">
             <span class="record-type-tag ${typeCls}">${typeTag}</span>
-            <span class="record-source">${r.source}</span>
+            <span class="record-source">${r.note || '无备注'}</span>
           </div>
           <div class="record-meta">${formatWeight(r.weight)}克 · 单价${formatMoney(r.pricePerGram)}</div>
         </div>
@@ -740,7 +740,7 @@ async function showDaySheet(dateStr, data) {
       <div class="sheet-item">
         <span class="sheet-item-icon">${icon}</span>
         <div class="sheet-item-info">
-          <div class="sheet-item-title">${typeTag} · ${tx.source}</div>
+          <div class="sheet-item-title">${typeTag} · ${tx.note || '无备注'}</div>
           <div class="sheet-item-meta">${formatWeight(tx.weight)}克 × ${formatMoney(tx.pricePerGram)}</div>
           ${imagesHtml}
         </div>
