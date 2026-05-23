@@ -1,0 +1,18 @@
+{
+  "name": "金灿灿",
+  "short_name": "金灿灿",
+  "description": "安全本地记录实物黄金白银投资，支持凭证拍照",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFFAF5",
+  "theme_color": "#D4A574",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

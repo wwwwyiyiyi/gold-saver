@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#D4A574">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="金灿灿">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+  <title>金灿灿</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+  <!-- Onboarding Overlay -->
+  <div id="onboarding" class="onboarding hidden">
+    <div class="onboarding-swiper">
+      <div class="onboarding-slide active" data-slide="0">
+        <div class="onboarding-icon">🟡</div>
+        <h2>记录你的攒金之旅</h2>
+        <p>安全本地记录每一笔黄金、白银的<br>买入与卖出，数据完全掌控在你手中</p>
+      </div>
+      <div class="onboarding-slide" data-slide="1">
+        <div class="onboarding-icon">📷</div>
+        <h2>拍照留证</h2>
+        <p>为每笔交易附加收据或实物照片<br>数据仅存储在设备本地，绝不上传</p>
+      </div>
+      <div class="onboarding-slide" data-slide="2">
+        <div class="onboarding-icon">📊</div>
+        <h2>实时估值</h2>
+        <p>自动获取实时金价银价<br>随时了解持仓盈亏，一目了然</p>
+      </div>
+    </div>
+    <div class="onboarding-dots">
+      <span class="dot active" data-dot="0"></span>
+      <span class="dot" data-dot="1"></span>
+      <span class="dot" data-dot="2"></span>
+    </div>
+    <button id="onboardingNext" class="btn btn-primary onboarding-btn">下一步</button>
+    <button id="onboardingSkip" class="btn btn-text onboarding-skip">跳过</button>
+  </div>
+
+  <!-- App Shell -->
+  <div id="app">
+    <!-- Header -->
+    <header id="appHeader" class="app-header">
+      <div class="header-left">
+        <h1 class="app-title">金灿灿</h1>
+        <span class="header-date" id="headerDate"></span>
+      </div>
+      <div class="header-right">
+        <span id="priceTimestamp" class="price-timestamp"></span>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="mainContent" class="main-content">
+      <!-- Page 1: Home Dashboard -->
+      <section id="page-home" class="page active">
+        <!-- Asset Cards -->
+        <div class="asset-cards">
+          <div class="asset-card gold-card">
+            <div class="asset-card-header">
+              <span class="asset-icon">🟡</span>
+              <span class="asset-label">黄金持仓</span>
+            </div>
+            <div class="asset-card-body">
+              <div class="asset-weight" id="goldWeight">0.00 克</div>
+              <div class="asset-row">
+                <span class="asset-cost-label">持仓成本</span>
+                <span class="asset-cost-value" id="goldCost">¥0</span>
+              </div>
+              <div class="asset-row">
+                <span class="asset-cost-label">平均克价</span>
+                <span class="asset-cost-value" id="goldAvgPrice">¥0</span>
+              </div>
+              <div class="asset-row">
+                <span class="asset-value-label">当前估值</span>
+                <span class="asset-value-value" id="goldValue">¥0</span>
+              </div>
+              <div class="asset-pnl" id="goldPnL">¥0 (0.00%)</div>
+            </div>
+          </div>
+
+          <div class="asset-card silver-card">
+            <div class="asset-card-header">
+              <span class="asset-icon">⚪</span>
+              <span class="asset-label">白银持仓</span>
+            </div>
+            <div class="asset-card-body">
+              <div class="asset-weight" id="silverWeight">0.00 克</div>
+              <div class="asset-row">
+                <span class="asset-cost-label">持仓成本</span>
+                <span class="asset-cost-value" id="silverCost">¥0</span>
+              </div>
+              <div class="asset-row">
+                <span class="asset-cost-label">平均克价</span>
+                <span class="asset-cost-value" id="silverAvgPrice">¥0</span>
+              </div>
+              <div class="asset-row">
+                <span class="asset-value-label">当前估值</span>
+                <span class="asset-value-value" id="silverValue">¥0</span>
+              </div>
+              <div class="asset-pnl" id="silverPnL">¥0 (0.00%)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Manual Price Card -->
+        <div class="price-card manual-price-card" id="manualPriceCard">
+          <div class="manual-price-header">💰 设定实时价格</div>
+          <p class="manual-price-hint" id="manualPriceHint">输入当前金价和银价，用于计算持仓估值与盈亏</p>
+          <div class="manual-price-row">
+            <label>🟡 黄金 (¥/克)</label>
+            <input type="number" id="manualGoldPrice" class="form-input" placeholder="例: 680.00" step="0.01">
+          </div>
+          <div class="manual-price-row">
+            <label>⚪ 白银 (¥/克)</label>
+            <input type="number" id="manualSilverPrice" class="form-input" placeholder="例: 7.80" step="0.01">
+          </div>
+          <button id="manualPriceSave" class="btn btn-primary" style="width:100%;margin-top:10px">更新价格</button>
+          <p class="manual-price-saved" id="manualPriceSaved"></p>
+        </div>
+
+        <!-- Backup -->
+        <div class="backup-card">
+          <div class="backup-header">☁️ 数据备份</div>
+          <p class="backup-hint">导出备份文件保存到 iCloud 或文件，换手机后可导入恢复</p>
+          <div class="backup-actions">
+            <button id="exportDataBtn" class="btn btn-primary btn-sm">📤 导出</button>
+            <button id="importDataBtn" class="btn btn-outline btn-sm">📥 导入</button>
+          </div>
+          <input type="file" id="importFileInput" accept=".json" class="hidden">
+          <p class="backup-info-text">🔒 所有数据（含照片）仅存储在设备本地，不上传服务器</p>
+          <p class="privacy-sub" id="backupInfo"></p>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="recent-section">
+          <div class="section-header">
+            <h3>最近交易</h3>
+            <button id="viewAllBtn" class="btn btn-text">查看全部 →</button>
+          </div>
+          <div id="recentTransactions" class="recent-list">
+            <div class="empty-hint">还没有交易记录</div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Page 2: Calendar -->
+      <section id="page-calendar" class="page">
+        <div class="calendar-header">
+          <button id="calPrevMonth" class="btn-icon cal-nav">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+          <h2 id="calMonthTitle" class="cal-month-title">2026年5月</h2>
+          <button id="calNextMonth" class="btn-icon cal-nav">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </button>
+        </div>
+        <div class="calendar-stats" id="calendarStats">
+          <span>📅 攒金 <strong id="calDays">0</strong> 天</span>
+          <span>⚖️ 累计 <strong id="calTotalWeight">0.00</strong> 克</span>
+          <span>💰 总投入 <strong id="calTotalAmount">¥0</strong></span>
+        </div>
+        <div class="calendar-grid" id="calendarGrid">
+          <!-- Filled by calendar.js -->
+        </div>
+        <div id="calendarEmpty" class="calendar-empty hidden">
+          还没有攒金记录，点击右下角➕开始你的攒金之旅吧~
+        </div>
+      </section>
+
+      <!-- Page 3: Records -->
+      <section id="page-records" class="page">
+        <div class="filter-bar" id="filterBar">
+          <button class="filter-btn active" data-filter="all">全部</button>
+          <button class="filter-btn" data-filter="gold">黄金</button>
+          <button class="filter-btn" data-filter="silver">白银</button>
+          <button class="filter-btn" data-filter="buy">买入</button>
+          <button class="filter-btn" data-filter="sell">卖出</button>
+        </div>
+        <div id="recordsList" class="records-list">
+          <div class="records-empty">
+            <div class="records-empty-icon">📋</div>
+            <p>还没有任何记录</p>
+            <button id="startRecordBtn" class="btn btn-primary">开始记录</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-page="home">
+        <span class="nav-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </span>
+        <span class="nav-label">首页</span>
+      </button>
+      <button class="nav-btn" data-page="calendar">
+        <span class="nav-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </span>
+        <span class="nav-label">日历</span>
+      </button>
+      <button class="nav-btn" data-page="records">
+        <span class="nav-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        </span>
+        <span class="nav-label">记录</span>
+      </button>
+    </nav>
+
+    <!-- FAB -->
+    <button id="fab" class="fab" title="添加记录">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+    </button>
+
+    <!-- FAB Menu -->
+    <div id="fabMenu" class="fab-menu hidden">
+      <button class="fab-menu-item" data-action="buy-gold">
+        <span class="fab-menu-icon">🟡</span>
+        <span>记录买金</span>
+      </button>
+      <button class="fab-menu-item" data-action="buy-silver">
+        <span class="fab-menu-icon">⚪</span>
+        <span>记录买银</span>
+      </button>
+      <button class="fab-menu-item" data-action="sell">
+        <span class="fab-menu-icon">📤</span>
+        <span>记录卖出</span>
+      </button>
+    </div>
+
+    <!-- FAB Overlay -->
+    <div id="fabOverlay" class="fab-overlay hidden"></div>
+
+    <!-- Transaction Form Modal -->
+    <div id="formModal" class="modal hidden">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="formTitle">添加交易记录</h2>
+          <button id="formCloseBtn" class="btn-icon modal-close">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <form id="transactionForm" class="modal-body">
+          <input type="hidden" id="formId">
+
+          <div class="form-group">
+            <label class="form-label">交易类型</label>
+            <div class="segmented" id="typeSegment">
+              <button type="button" class="seg-btn active" data-value="buy">买入</button>
+              <button type="button" class="seg-btn" data-value="sell">卖出</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">金属类型</label>
+            <div class="segmented" id="metalSegment">
+              <button type="button" class="seg-btn active" data-value="gold">🟡 黄金</button>
+              <button type="button" class="seg-btn" data-value="silver">⚪ 白银</button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group form-half">
+              <label class="form-label" for="formWeight">克重</label>
+              <input type="number" id="formWeight" class="form-input" placeholder="0.00" step="0.01" min="0.01" required>
+            </div>
+            <div class="form-group form-half">
+              <label class="form-label" for="formPrice">每克价格 (¥)</label>
+              <input type="number" id="formPrice" class="form-input" placeholder="0.00" step="0.01" min="0.01" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="formTotal">总金额 (¥)</label>
+            <input type="number" id="formTotal" class="form-input" placeholder="自动计算" step="0.01" min="0.01">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="formDate">交易日期</label>
+            <input type="date" id="formDate" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="formSource">购买来源</label>
+            <select id="formSource" class="form-input">
+              <option value="">请选择</option>
+              <option value="银行">银行</option>
+              <option value="金店">金店</option>
+              <option value="周大福">周大福</option>
+              <option value="周生生">周生生</option>
+              <option value="线上平台">线上平台</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">凭证照片 <span class="form-hint">(最多3张)</span></label>
+            <div class="photo-area" id="photoArea">
+              <button type="button" id="addPhotoBtn" class="photo-add-btn">
+                <span class="photo-add-icon">📷</span>
+                <span>点击添加照片</span>
+              </button>
+              <div id="photoPreviews" class="photo-previews"></div>
+            </div>
+            <input type="file" id="photoInput" accept="image/*" capture="environment" multiple class="hidden">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="formNote">备注 (可选)</label>
+            <input type="text" id="formNote" class="form-input" placeholder="添加备注...">
+          </div>
+
+          <div class="form-actions">
+            <button type="button" id="formDeleteBtn" class="btn btn-danger hidden">删除记录</button>
+            <button type="submit" class="btn btn-primary form-submit">保存记录</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div id="imagePreviewModal" class="modal hidden">
+      <div class="modal-backdrop"></div>
+      <div class="image-preview-content">
+        <button id="imagePreviewClose" class="btn-icon image-preview-close">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+        <img id="imagePreviewImg" src="" alt="凭证照片">
+      </div>
+    </div>
+
+    <!-- Calendar Day Detail Sheet -->
+    <div id="daySheet" class="bottom-sheet hidden">
+      <div class="sheet-backdrop"></div>
+      <div class="sheet-content">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+          <h3 id="sheetDate">日期</h3>
+          <button id="sheetCloseBtn" class="btn-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div id="sheetBody" class="sheet-body"></div>
+        <div id="sheetSummary" class="sheet-summary"></div>
+      </div>
+    </div>
+
+    <!-- Delete Confirm Dialog -->
+    <div id="confirmDialog" class="modal hidden">
+      <div class="modal-backdrop"></div>
+      <div class="confirm-content">
+        <div class="confirm-icon">⚠️</div>
+        <h3 id="confirmTitle">确认删除</h3>
+        <p id="confirmMsg">确定要删除这条记录吗？此操作无法撤销。</p>
+        <div class="confirm-actions">
+          <button id="confirmCancelBtn" class="btn btn-text">取消</button>
+          <button id="confirmOkBtn" class="btn btn-danger">确认删除</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
